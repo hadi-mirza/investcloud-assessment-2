@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "tWJds9V+VcucKSfils0M1u2h8mDIVcr3V9RZKG1/jQUocLAkwZnnJQEOC8EwhSWlD/B9U+OoHNCD88/z6MMwCQ==",
+  "success": true,
+  "projectFilePath": "/Users/hadi/code/angular/assessment-2/assessment-2.csproj",
+  "expectedPackageFiles": [
+    "/Users/hadi/.nuget/packages/newtonsoft.json/13.0.1/newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

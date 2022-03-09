@@ -1,0 +1,17 @@
+/Users/hadi/code/angular/assessment-2/bin/Debug/net6.0/assessment-2
+/Users/hadi/code/angular/assessment-2/bin/Debug/net6.0/assessment-2.deps.json
+/Users/hadi/code/angular/assessment-2/bin/Debug/net6.0/assessment-2.runtimeconfig.json
+/Users/hadi/code/angular/assessment-2/bin/Debug/net6.0/assessment-2.dll
+/Users/hadi/code/angular/assessment-2/bin/Debug/net6.0/assessment-2.pdb
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/assessment-2.csproj.AssemblyReference.cache
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/assessment-2.GeneratedMSBuildEditorConfig.editorconfig
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/assessment-2.AssemblyInfoInputs.cache
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/assessment-2.AssemblyInfo.cs
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/assessment-2.csproj.CoreCompileInputs.cache
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/assessment-2.dll
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/refint/assessment-2.dll
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/assessment-2.pdb
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/assessment-2.genruntimeconfig.cache
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/ref/assessment-2.dll
+/Users/hadi/code/angular/assessment-2/bin/Debug/net6.0/Newtonsoft.Json.dll
+/Users/hadi/code/angular/assessment-2/obj/Debug/net6.0/assessment-2.csproj.CopyComplete
