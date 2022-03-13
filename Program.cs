@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
-using System;
 
 namespace ICMatrixAssessment
 {
@@ -50,15 +50,25 @@ namespace ICMatrixAssessment
             datasetB = GenerateMatrix(datasetInitSize);
 
             Console.WriteLine("Local Matrix Generation...success!");
+            Console.WriteLine("Start dataset fetch...");
 
-            Task<int[][]> fetchA = CreateABMatrix(datasetInitSize, "A");
-            Task<int[][]> fetchB = CreateABMatrix(datasetInitSize, "B");
+            Parallel.Invoke(() =>
+            {
+                Task<int[][]> fetchA = CreateABMatrix(datasetInitSize, "A");
+                datasetA = fetchA.Result;
+                Console.WriteLine("Dataset A fetch complete");
+            },
 
-            Console.WriteLine("Fetching dataset from server...");
+            () =>
+            {
+                Task<int[][]> fetchB = CreateABMatrix(datasetInitSize, "B");
+                datasetB = fetchB.Result;
+                Console.WriteLine("Dataset B fetch complete");
+            });
 
-            Task.WaitAll(fetchA, fetchB);
-            datasetA = fetchA.Result;
-            datasetB = fetchB.Result;
+            // Task.WaitAll(fetchA, fetchB);
+            // datasetA = fetchA.Result;
+            // datasetB = fetchB.Result;
 
             Console.WriteLine("Remote Dataset A/B fetch...success!");
             Console.WriteLine("Multplying Matrices...");
@@ -72,6 +82,7 @@ namespace ICMatrixAssessment
             }
             string hashedString = GetHash(accString.ToString());
             Console.WriteLine("Verifying Hashed string: {0}", hashedString);
+            await VerifyHash(hashedString);
             Console.WriteLine("Verification...{0}", response.Success ? "Success!" : "Fail");
             timer.Stop();
             TimeSpan timespan = timer.Elapsed;
@@ -96,29 +107,31 @@ namespace ICMatrixAssessment
             return result!;
         }
 
-        static async Task<int[][]> CreateABMatrix(int datasetSize, string dataset)
-
+        static Task<int[][]> CreateABMatrix(int datasetSize, string dataset)
         {
             int[][] array = GenerateMatrix(datasetSize);
+            var list = new List<int>();
 
+            var listResults = new List<string>();
             for (int i = 0; i < datasetSize; i++)
             {
-                string content = string.Empty;
-                string contentPath = string.Format(baseUrl + "api/numbers/" + dataset + "row" + i.ToString());
-                HttpResponseMessage response = await client.GetAsync(contentPath);
-                if (response.IsSuccessStatusCode)
-                {
-                    content = await response.Content.ReadAsStringAsync();
-                }
-                MatrixResponse? result = JsonConvert.DeserializeObject<MatrixResponse>(content);
+                list.Add(i);
+            }
+
+            Parallel.ForEach(list, new ParallelOptions() { MaxDegreeOfParallelism = 1 }, index =>
+            {
+                HttpResponseMessage response = client.GetAsync(baseUrl + "api/numbers/" + dataset + "/row/" + index.ToString()).Result;
+
+                var contents = response.Content.ReadAsStringAsync().Result;
+                listResults.Add(contents);
+                MatrixResponse? result = JsonConvert.DeserializeObject<MatrixResponse>(contents);
                 if (result?.Value != null)
                 {
-                    array[i] = result.Value;
-
+                    array[index] = result.Value;
                 }
-                Console.Write("\r#{0}   ", i);
-            }
-            return array;
+                Console.Write("\r#{0}   ", index);
+            });
+            return Task.FromResult(array);
         }
 
         static int[][] GenerateMatrix(int datasetSize)
@@ -128,11 +141,19 @@ namespace ICMatrixAssessment
                 newMatrix[i] = new int[datasetSize];
             return newMatrix;
         }
+        // static int[][] MultiplyMatrices(int[][] datasetA, int[][] datasetB)
+        // {
+        //     int size = datasetA.Length;
+        //     int[][] product = GenerateMatrix(size);
+        //     Console.WriteLine(product);
+
+        //     return product;
+        // }
         static int[][] MultiplyMatrices(int[][] datasetA, int[][] datasetB)
         {
             int size = datasetA.Length;
             int[][] product = GenerateMatrix(size);
-            Parallel.For(0, size, i =>
+            ParallelLoopResult parallelLoopResult = Parallel.For(0, size, i =>
             {
                 for (int j = 0; j < size; j++)
                 {
@@ -142,10 +163,27 @@ namespace ICMatrixAssessment
                     }
                 }
             });
-            // Console.WriteLine("Multiplying Matrices...success!");
-
             return product;
         }
+
+        // static string ConcatMatrix(int[][] datasetC)
+        // {
+        //     int size = datasetC.Length;
+        //     var result = new StringBuilder();
+
+        //     for (int i = 0; i < size; i++)
+        //     {
+        //         foreach (var item in datasetC[i])
+        //         {
+        //             result.Append("," + item);
+        //         }
+        //     }
+
+        //     var resultToString = result.ToString();
+
+        //     Console.WriteLine(resultToString);
+        //     return resultToString;
+        // }
 
 
         static string GetHash(string input)
@@ -160,6 +198,17 @@ namespace ICMatrixAssessment
                 accString.Append(hashedString[i].ToString("X2"));
             }
             return accString.ToString();
+        }
+
+        static async Task VerifyHash(string input)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("https://recruitment-test.investcloud.com/");
+                StringContent content = new StringContent(input, Encoding.UTF8, "application/json");
+                var result = await client.PostAsync("api/numbers/validate", content);
+                string resultContent = await result.Content.ReadAsStringAsync();
+            }
         }
     }
 }
