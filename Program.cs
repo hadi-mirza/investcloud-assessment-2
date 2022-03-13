@@ -1,35 +1,17 @@
 ﻿using Newtonsoft.Json;
 using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace ICMatrixAssessment
 {
-    public class Responses
-    {
-        public string? Value { get; set; }
-        public string? Cause { get; set; }
-        public bool Success { get; set; }
-    }
-
-    public class MatrixResponse
-    {
-        public int[]? Value { get; set; }
-        public string? Cause { get; set; }
-        public bool Success { get; set; }
-    }
-
     class Program
     {
         static string baseUrl = "https://recruitment-test.investcloud.com/";
         static int datasetInitSize = 1000;
         static HttpClient client = new HttpClient();
 
-        static void Main(string[] args)
-        {
-            RunProgram().GetAwaiter().GetResult();
-        }
+        static void Main(string[] args) => RunProgram().GetAwaiter().GetResult();
 
         static async Task RunProgram()
         {
@@ -38,19 +20,13 @@ namespace ICMatrixAssessment
             Stopwatch timer = new Stopwatch();
 
             Responses response = await InitDataset(datasetInitSize);
-
-            int[][]? datasetA = null;
-            int[][]? datasetB = null;
-            int[][]? datasetC = null;
-
-
             timer.Start();
 
-            datasetA = GenerateMatrix(datasetInitSize);
-            datasetB = GenerateMatrix(datasetInitSize);
+            int[][]? datasetA = GenerateMatrix(datasetInitSize);
+            int[][]? datasetB = GenerateMatrix(datasetInitSize);
 
             Console.WriteLine("Local Matrix Generation...success!");
-            Console.WriteLine("Start dataset fetch...");
+            Console.WriteLine("Start synchronous dataset fetch...");
 
             Parallel.Invoke(() =>
             {
@@ -66,14 +42,10 @@ namespace ICMatrixAssessment
                 Console.WriteLine("Dataset B fetch complete");
             });
 
-            // Task.WaitAll(fetchA, fetchB);
-            // datasetA = fetchA.Result;
-            // datasetB = fetchB.Result;
-
             Console.WriteLine("Remote Dataset A/B fetch...success!");
-            Console.WriteLine("Multplying Matrices...");
+            Console.WriteLine("Multiplying Matrices...");
 
-            datasetC = MultiplyMatrices(datasetA, datasetB);
+            int[][]? datasetC = MultiplyMatrices(datasetA, datasetB);
             List<int[]> results = datasetC.ToList();
             StringBuilder accString = new StringBuilder();
             foreach (int[] array in results)
@@ -129,7 +101,7 @@ namespace ICMatrixAssessment
                 {
                     array[index] = result.Value;
                 }
-                Console.Write("\r#{0}   ", index);
+                Console.Write("\r{0}: #{1}      ", dataset, index);
             });
             return Task.FromResult(array);
         }
@@ -141,14 +113,6 @@ namespace ICMatrixAssessment
                 newMatrix[i] = new int[datasetSize];
             return newMatrix;
         }
-        // static int[][] MultiplyMatrices(int[][] datasetA, int[][] datasetB)
-        // {
-        //     int size = datasetA.Length;
-        //     int[][] product = GenerateMatrix(size);
-        //     Console.WriteLine(product);
-
-        //     return product;
-        // }
         static int[][] MultiplyMatrices(int[][] datasetA, int[][] datasetB)
         {
             int size = datasetA.Length;
@@ -165,26 +129,6 @@ namespace ICMatrixAssessment
             });
             return product;
         }
-
-        // static string ConcatMatrix(int[][] datasetC)
-        // {
-        //     int size = datasetC.Length;
-        //     var result = new StringBuilder();
-
-        //     for (int i = 0; i < size; i++)
-        //     {
-        //         foreach (var item in datasetC[i])
-        //         {
-        //             result.Append("," + item);
-        //         }
-        //     }
-
-        //     var resultToString = result.ToString();
-
-        //     Console.WriteLine(resultToString);
-        //     return resultToString;
-        // }
-
 
         static string GetHash(string input)
         {
